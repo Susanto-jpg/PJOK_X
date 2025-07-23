@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eksplorasi Dunia Bola Voli - Materi Interaktif</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutral Harmony (Enhanced) -->
+    <!-- Application Structure Plan: Desain aplikasi ini menggunakan struktur Single-Page Application (SPA) dengan navigasi berbasis tab untuk memecah materi menjadi beberapa bagian logis: Dasar-Dasar, Teknik, Posisi, Lapangan & Aturan, dan Tips. Pendekatan ini dipilih untuk menggantikan format laporan linear yang panjang, memungkinkan siswa untuk langsung menuju topik yang diminati tanpa harus menggulir. Interaksi utama melibatkan klik pada tab untuk navigasi konten, dan klik pada kartu-kartu di bagian Teknik dan Posisi untuk menampilkan detail. Struktur ini meningkatkan kemudahan penemuan dan membuat pembelajaran lebih fokus dan tidak membosankan. -->
+    <!-- Visualization & Content Choices: 
+    - Ukuran Lapangan & Net: Goal(Inform & Compare) -> Viz(Diagram HTML/CSS & Bar Chart) -> Interaction(Hover pada diagram, perbandingan visual pada chart) -> Justification(Mengubah data numerik menjadi visual yang lebih mudah dipahami dan dibandingkan) -> Library/Method(Tailwind, Chart.js).
+    - Teknik & Posisi: Goal(Organize & Inform) -> Viz(Kartu interaktif dengan ikon) -> Interaction(Klik untuk membuka/menutup detail) -> Justification(Menyajikan informasi dalam potongan yang dapat dikelola, mendorong eksplorasi aktif daripada membaca pasif) -> Library/Method(Tailwind, Vanilla JS).
+    - Aturan & Tips: Goal(Inform) -> Viz(Daftar terstruktur dengan ikon) -> Interaction(Tidak ada, fokus pada keterbacaan) -> Justification(Penyajian yang jelas dan ringkas adalah yang terbaik untuk informasi faktual) -> Library/Method(Tailwind).
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fcf8f5; /* Slightly warmer off-white */
+            color: #3b3734; /* Darker stone for better contrast */
+        }
+        .nav-link {
+            transition: color 0.3s, border-color 0.3s, background-color 0.3s;
+            border-radius: 0.75rem 0.75rem 0 0;
+        }
+        .nav-link.active {
+            color: #ea580c; /* Deeper orange for active state */
+            border-bottom-color: #ea580c;
+            background-color: #fff7ed; /* Light orange background for active tab */
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .interactive-card {
+            transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
+            border-radius: 1rem; /* More rounded corners */
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05); /* Subtle initial shadow */
+        }
+        .interactive-card:hover {
+            transform: translateY(-8px); /* More pronounced lift */
+            box-shadow: 0 15px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1); /* Stronger shadow on hover */
+        }
+        .card-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.6s ease-in-out, padding 0.6s ease-in-out; /* Slower transition */
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+        .interactive-card.open .card-content {
+            max-height: 800px; /* Increased max-height for more content */
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+        .court-area {
+            transition: background-color 0.3s ease-in-out;
+        }
+        .court-area:hover {
+            background-color: #fcd34d !important; /* Brighter hover for court */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 450px; /* Slightly wider chart */
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px; /* Slightly taller chart */
+            max-height: 380px;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="container mx-auto px-4 py-10 max-w-5xl">
+        
+        <header class="text-center mb-10">
+            <h1 class="text-5xl md:text-6xl font-extrabold text-stone-800 tracking-tight">Eksplorasi Dunia Bola Voli</h1>
+            <p class="mt-4 text-xl text-stone-600">Materi Ajar Interaktif & Menyenangkan untuk Kelas 10</p>
+        </header>
+
+        <nav class="flex justify-center border-b-2 border-amber-200 mb-10 flex-wrap gap-2 md:gap-4">
+            <button class="nav-link py-3 px-6 text-lg block hover:text-orange-600 focus:outline-none border-b-2 border-transparent font-semibold text-stone-700" data-target="dasar">Dasar-Dasar</button>
+            <button class="nav-link py-3 px-6 text-lg block hover:text-orange-600 focus:outline-none border-b-2 border-transparent font-semibold text-stone-700" data-target="teknik">Teknik</button>
+            <button class="nav-link py-3 px-6 text-lg block hover:text-orange-600 focus:outline-none border-b-2 border-transparent font-semibold text-stone-700" data-target="posisi">Posisi</button>
+            <button class="nav-link py-3 px-6 text-lg block hover:text-orange-600 focus:outline-none border-b-2 border-transparent font-semibold text-stone-700" data-target="lapangan">Lapangan & Aturan</button>
+            <button class="nav-link py-3 px-6 text-lg block hover:text-orange-600 focus:outline-none border-b-2 border-transparent font-semibold text-stone-700" data-target="tips">Tips Jago</button>
+        </nav>
+
+        <main>
+            <!-- Section: Dasar-Dasar -->
+            <section id="dasar" class="content-section">
+                 <div class="bg-amber-50 rounded-2xl p-8 shadow-md">
+                    <h2 class="text-3xl font-bold text-stone-800 mb-4">Apa Itu Bola Voli?</h2>
+                    <p class="text-stone-700 leading-relaxed mb-6">Selamat datang di dunia bola voli! Di sini, kita akan belajar tentang olahraga tim yang seru dan menantang. Bayangkan ada sebuah jaring tinggi di tengah lapangan. Tujuanmu dan timmu adalah bekerja sama untuk menjatuhkan bola ke area lawan, dan sebaliknya, menjaga agar bola tidak jatuh di area timmu. Setiap sentuhan dan gerakan sangat berarti!</p>
+                    <div class="border-t border-amber-200 pt-6 mt-6">
+                        <h3 class="text-2xl font-bold text-stone-800 mb-3">Sejarah Singkat yang Keren</h3>
+                        <p class="text-stone-700 leading-relaxed">Permainan ini diciptakan oleh seorang instruktur olahraga bernama <strong>William G. Morgan</strong> pada tahun 1895 di Amerika Serikat. Awalnya, permainan ini disebut "Mintonette" dan dirancang sebagai olahraga yang tidak terlalu menuntut fisik seperti bola basket. Sungguh sebuah ide brilian yang kini mendunia!</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: Teknik -->
+            <section id="teknik" class="content-section">
+                <div class="text-center mb-8">
+                    <h2 class="text-4xl font-bold text-stone-800">Kunci Jago Main Voli</h2>
+                    <p class="text-stone-600 mt-3 text-lg">Kuasai teknik-teknik dasar ini untuk menjadi pemain yang andal. Klik setiap kartu untuk melihat detailnya!</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="interactive-card bg-white rounded-xl p-6 shadow-md cursor-pointer border border-stone-200">
+                        <h3 class="text-2xl font-bold flex items-center"><span class="text-3xl mr-3">👋</span> Servis: Memulai Serangan</h3>
+                        <div class="card-content">
+                            <p class="text-stone-600 mb-4">Servis adalah pukulan pertama untuk memulai permainan dan merupakan serangan awal tim Anda. Ada beberapa jenis servis:</p>
+                            <ul class="space-y-3 text-stone-700">
+                                <li><strong>Servis Bawah (Underhand Serve):</strong>
+                                    <ul class="list-disc list-inside ml-4">
+                                        <li>**Posisi:** Berdiri dengan kaki kiri di depan (bagi yang tidak kidal), bola di tangan kiri.</li>
+                                        <li>**Gerakan:** Ayunkan tangan kanan dari belakang bawah ke depan, pukul bola dengan telapak tangan atau kepalan tangan bagian bawah.</li>
+                                        <li>**Fokus:** Kontrol arah dan kekuatan agar bola melewati net.</li>
+                                        <li>**Analogi:** Seperti mendorong bola ke depan dengan telapak tangan dari bawah. Cocok untuk pemula.</li>
+                                    </ul>
+                                </li>
+                                <li><strong>Servis Atas (Overhand Serve):</strong>
+                                    <ul class="list-disc list-inside ml-4">
+                                        <li>**Posisi:** Berdiri tegak, bola di tangan kiri, lambungkan bola sedikit ke atas dan depan.</li>
+                                        <li>**Gerakan:** Ayunkan tangan kanan dari atas kepala, pukul bola dengan telapak tangan terbuka pada titik tertinggi.</li>
+                                        <li>**Fokus:** Power dan akurasi untuk menghasilkan bola yang kencang dan menukik.</li>
+                                        <li>**Analogi:** Seperti melempar bola dengan kuat, lalu memukulnya saat di udara. Lebih kencang dan sulit diterima.</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="interactive-card bg-white rounded-xl p-6 shadow-md cursor-pointer border border-stone-200">
+                        <h3 class="text-2xl font-bold flex items-center"><span class="text-3xl mr-3">🤲</span> Passing: Menerima & Mengumpan</h3>
+                        <div class="card-content">
+                             <p class="text-stone-600 mb-4">Passing adalah teknik fundamental untuk menerima bola dari lawan atau mengumpan kepada rekan setim. Ada dua jenis utama:</p>
+                             <ul class="space-y-3 text-stone-700">
+                                <li><strong>Passing Bawah (Underhand Pass / Dig):</strong>
+                                    <ul class="list-disc list-inside ml-4">
+                                        <li>**Posisi:** Tekuk lutut, badan condong ke depan. Satukan kedua lengan lurus ke depan, rapatkan ibu jari.</li>
+                                        <li>**Gerakan:** Biarkan bola memantul di lengan bawah (antara pergelangan tangan dan siku). Gunakan dorongan kaki untuk mengarahkan bola.</li>
+                                        <li>**Fungsi:** Menerima servis atau serangan keras dari lawan, menjaga bola tetap hidup.</li>
+                                        <li>**Analogi:** Bayangkan lenganmu adalah "papan" atau "landasan" yang datar, tempat bola mendarat dan memantul ke atas.</li>
+                                    </ul>
+                                </li>
+                                <li><strong>Passing Atas (Overhead Pass / Setting):</strong>
+                                    <ul class="list-disc list-inside ml-4">
+                                        <li>**Posisi:** Siap dengan jari-jari terbuka membentuk mangkuk di atas kepala.</li>
+                                        <li>**Gerakan:** Dorong bola dengan ujung jari-jari kedua tangan secara bersamaan. Pergelangan tangan berperan penting dalam mengarahkan bola.</li>
+                                        <li>**Fungsi:** Mengumpan bola kepada spiker untuk melakukan serangan (spike) yang terarah dan efektif.</li>
+                                        <li>**Analogi:** Mirip seperti kalian "menggendong" bola dengan jari-jari, lalu mendorongnya perlahan ke atas, seperti mendorong balon agar melayang.</li>
+                                    </ul>
+                                </li>
+                             </ul>
+                        </div>
+                    </div>
+                    <div class="interactive-card bg-white rounded-xl p-6 shadow-md cursor-pointer border border-stone-200">
+                        <h3 class="text-2xl font-bold flex items-center"><span class="text-3xl mr-3">💥</span> Spike / Smash: Serangan Mematikan</h3>
+                        <div class="card-content">
+                            <p class="text-stone-600 mb-4">Spike adalah pukulan keras yang bertujuan menjatuhkan bola secepat mungkin ke area lawan untuk mendapatkan poin.</p>
+                            <ul class="space-y-3 text-stone-700">
+                                <li>**Awalan (Approach):** Lakukan beberapa langkah awalan (biasanya 3-4 langkah) untuk mendapatkan momentum.</li>
+                                <li>**Tolakan (Jump):** Lompat setinggi mungkin dengan kedua kaki secara bersamaan. Ayunkan tangan yang tidak memukul ke atas untuk membantu keseimbangan.</li>
+                                <li>**Pukulan (Hit):** Pukul bola dengan telapak tangan terbuka dan kuat pada titik tertinggi lompatan, arahkan bola menukik ke bawah.</li>
+                                <li>**Pendaratan (Landing):** Mendarat dengan kedua kaki secara seimbang untuk menghindari cedera dan siap untuk gerakan selanjutnya.</li>
+                            </ul>
+                            <p class="mt-4 text-stone-600"><strong>Analogi:</strong> Mirip seperti kalian memukul palu ke paku, tujuannya agar paku menancap dalam. Di voli, tujuannya agar bola "menancap" di lapangan lawan!</p>
+                        </div>
+                    </div>
+                    <div class="interactive-card bg-white rounded-xl p-6 shadow-md cursor-pointer border border-stone-200">
+                        <h3 class="text-2xl font-bold flex items-center"><span class="text-3xl mr-3">🛡️</span> Blok: Tembok Pertahanan</h3>
+                        <div class="card-content">
+                            <p class="text-stone-600 mb-4">Blok adalah teknik membendung serangan (spike) lawan di depan net, bertujuan untuk menghentikan bola atau mengubah arahnya agar mudah diterima rekan setim.</p>
+                            <ul class="space-y-3 text-stone-700">
+                                <li>**Posisi:** Berdiri di depan net, siap melompat. Perhatikan gerakan spiker lawan.</li>
+                                <li>**Timing:** Lompat pada saat yang tepat, sesaat setelah spiker lawan melompat untuk memukul bola.</li>
+                                <li>**Tangan:** Angkat kedua tangan lurus ke atas, jari-jari terbuka dan rapat, usahakan "menembus" net ke area lawan (tanpa menyentuh net).</li>
+                                <li>**Pendaratan:** Mendarat dengan seimbang dan siap untuk gerakan selanjutnya.</li>
+                            </ul>
+                            <p class="mt-4 text-stone-600"><strong>Analogi:</strong> Bayangkan kalian sedang membangun "tembok" tinggi di depan rumah agar tidak ada yang bisa masuk. Di voli, tembok itu untuk menghalau bola lawan!</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: Posisi -->
+            <section id="posisi" class="content-section">
+                <div class="text-center mb-8">
+                    <h2 class="text-4xl font-bold text-stone-800">Setiap Orang Penting!</h2>
+                    <p class="text-stone-600 mt-3 text-lg">Dalam voli, setiap pemain punya peran unik. Kenali posisi-posisi ini dan temukan peranmu!</p>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                     <div class="interactive-card bg-white rounded-xl p-6 shadow-md cursor-pointer border border-stone-200">
+                        <h3 class="text-2xl font-bold flex items-center"><span class="text-3xl mr-3">🧠</span> Setter / Tosser</h3>
+                        <div class="card-content">
+                            <p class="text-stone-600"><strong>Otak serangan tim!</strong> Tugas utamanya adalah mengatur dan memberikan umpan (passing atas) yang akurat kepada spiker agar bisa melakukan smash. Setter harus pintar membaca permainan lawan dan memilih spiker yang tepat. Mereka adalah pengatur irama serangan tim.</p>
+                        </div>
+                    </div>
+                    <div class="interactive-card bg-white rounded-xl p-6 shadow-md cursor-pointer border border-stone-200">
+                        <h3 class="text-2xl font-bold flex items-center"><span class="text-3xl mr-3">⚔️</span> Spiker / Hitter</h3>
+                        <div class="card-content">
+                            <p class="text-stone-600"><strong>Mesin pencetak poin!</strong> Pemain yang bertugas melakukan pukulan smash (spike) yang keras dan mematikan ke area lawan untuk mendapatkan poin. Mereka harus punya kekuatan melompat dan memukul yang baik, serta kemampuan membaca blok lawan.</p>
+                        </div>
+                    </div>
+                    <div class="interactive-card bg-white rounded-xl p-6 shadow-md cursor-pointer border border-stone-200">
+                        <h3 class="text-2xl font-bold flex items-center"><span class="text-3xl mr-3">🛡️</span> Blocker</h3>
+                        <div class="card-content">
+                            <p class="text-stone-600"><strong>Benteng pertahanan di net!</strong> Bertugas membendung serangan smash dari lawan di depan net. Mereka harus punya refleks cepat, kemampuan melompat yang tinggi, dan koordinasi yang baik dengan blocker lain untuk membentuk "tembok" yang solid.</p>
+                        </div>
+                    </div>
+                    <div class="interactive-card bg-white rounded-xl p-6 shadow-md cursor-pointer border border-stone-200 col-span-1 md:col-span-2 lg:col-span-3">
+                        <h3 class="text-2xl font-bold flex items-center"><span class="text-3xl mr-3">👤</span> Libero</h3>
+                        <div class="card-content">
+                            <p class="text-stone-600"><strong>Spesialis pertahanan!</strong> Libero adalah pemain yang sangat ahli dalam passing bawah dan menjaga bola agar tidak jatuh. Mereka hanya boleh bermain di barisan belakang (back row) dan tidak boleh melakukan servis, blok, atau smash dari depan garis serang. Ciri khasnya adalah menggunakan seragam dengan warna yang berbeda dari pemain lain di timnya.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: Lapangan & Aturan -->
+            <section id="lapangan" class="content-section">
+                <div class="text-center mb-8">
+                    <h2 class="text-4xl font-bold text-stone-800">Arena Permainan</h2>
+                    <p class="text-stone-600 mt-3 text-lg">Pahami area bermain dan aturan dasar untuk bermain dengan benar dan sportif.</p>
+                </div>
+                <div class="grid lg:grid-cols-2 gap-8">
+                    <div class="bg-white p-6 rounded-2xl border border-stone-200 shadow-md">
+                         <h3 class="text-xl font-bold mb-4 text-center text-stone-800">Diagram Lapangan Voli</h3>
+                         <div class="bg-orange-100 p-3 rounded-lg">
+                            <div class="relative w-full" style="padding-top: 55%;">
+                                <div class="absolute inset-0 flex flex-col border-2 border-stone-700 text-xs text-stone-700 font-semibold">
+                                    <div class="flex-1 flex border-b-2 border-stone-700">
+                                        <div class="court-area flex-1 border-r border-dashed border-stone-500 flex items-center justify-center text-center p-1" title="Area Belakang (9m x 6m)">Area Belakang</div>
+                                        <div class="court-area w-1/3 border-r border-stone-700 flex items-center justify-center text-center p-1" title="Area Serang (9m x 3m)">Area Serang</div>
+                                    </div>
+                                    <div class="flex-1 flex">
+                                        <div class="court-area w-1/3 border-r border-stone-700 flex items-center justify-center text-center p-1" title="Area Serang (9m x 3m)">Area Serang</div>
+                                        <div class="court-area flex-1 border-r border-dashed border-stone-500 flex items-center justify-center text-center p-1" title="Area Belakang (9m x 6m)">Area Belakang</div>
+                                    </div>
+                                    <div class="absolute top-1/2 left-0 right-0 h-0.5 bg-stone-800"></div>
+                                    <div class="absolute top-0 bottom-0 left-1/2 w-0.5 bg-transparent"></div>
+                                    <div class="absolute top-0 right-1/3 w-0.5 h-full bg-stone-600"></div>
+                                    <div class="absolute top-0 left-1/3 w-0.5 h-full bg-stone-600"></div>
+                                    <div class="absolute -bottom-6 w-full text-center text-sm text-stone-600">Panjang Total: 18m</div>
+                                     <div class="absolute -left-12 top-1/2 -translate-y-1/2 text-center text-sm -rotate-90 text-stone-600">Lebar: 9m</div>
+                                </div>
+                            </div>
+                         </div>
+                         <p class="text-center text-sm text-stone-500 mt-6">Arahkan kursor ke area lapangan untuk melihat detail.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl border border-stone-200 shadow-md">
+                        <h3 class="text-xl font-bold mb-4 text-center text-stone-800">Perbandingan Tinggi Net</h3>
+                        <div class="chart-container">
+                             <canvas id="netHeightChart"></canvas>
+                        </div>
+                         <p class="text-center text-sm text-stone-500 mt-4">Tinggi net berbeda untuk kategori putra dan putri.</p>
+                    </div>
+                </div>
+                 <div class="bg-white mt-8 p-6 rounded-2xl border border-stone-200 shadow-md">
+                    <h3 class="text-xl font-bold mb-4 text-stone-800">Aturan Emas Bola Voli</h3>
+                    <ul class="space-y-3 text-stone-700">
+                        <li>🔢 **Jumlah Pemain:** Setiap tim terdiri dari **6 orang** pemain inti di lapangan.</li>
+                        <li>🎯 **Sistem Skor (Rally Point):** Setiap kali bola mati, akan ada poin yang didapatkan oleh salah satu tim. Satu set dimenangkan oleh tim yang pertama mencapai **25 poin** dengan selisih minimal 2 poin. Pertandingan biasanya dimainkan dalam **2 atau 3 set kemenangan**.</li>
+                        <li>🔄 **Rotasi Pemain:** Setelah tim mendapatkan poin dari servis lawan, pemain akan **berputar satu posisi searah jarum jam**. Ini penting agar semua pemain merasakan posisi yang berbeda.</li>
+                        <li>🖐️ **Sentuhan Bola:** Setiap tim **maksimal hanya boleh menyentuh bola 3 kali** untuk mengembalikan bola ke area lawan. Sentuhan blok (membendung serangan di depan net) tidak dihitung sebagai sentuhan pertama.</li>
+                        <li>📜 **Pelanggaran Umum:** Dilarang menyentuh net saat bola dalam permainan, melewati garis tengah saat lawan masih bermain, atau memukul bola dua kali berturut-turut oleh satu pemain.</li>
+                    </ul>
+                </div>
+            </section>
+            
+            <!-- Section: Tips -->
+            <section id="tips" class="content-section">
+                 <div class="text-center mb-8">
+                    <h2 class="text-4xl font-bold text-stone-800">Cara Cepat Jago</h2>
+                    <p class="text-stone-600 mt-3 text-lg">Ikuti tips sederhana ini untuk meningkatkan permainanmu secara konsisten.</p>
+                </div>
+                <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="bg-white p-6 rounded-2xl border border-stone-200 shadow-md">
+                        <h3 class="font-bold text-xl mb-2 text-stone-800">🏃‍♂️ Latihan Rutin</h3>
+                        <p class="text-stone-600">Konsistensi adalah kunci. Semakin sering berlatih, gerakanmu akan semakin alami dan refleksmu akan meningkat.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl border border-stone-200 shadow-md">
+                        <h3 class="font-bold text-xl mb-2 text-stone-800">🔥 Pemanasan & Pendinginan</h3>
+                        <p class="text-stone-600">Jangan sepelekan! Pemanasan sebelum bermain mencegah cedera, dan pendinginan setelahnya membantu pemulihan otot.</p>
+                    </div>
+                     <div class="bg-white p-6 rounded-2xl border border-stone-200 shadow-md">
+                        <h3 class="font-bold text-xl mb-2 text-stone-800">👀 Amati & Tiru</h3>
+                        <p class="text-stone-600">Perhatikan cara bermain teman yang jago atau pemain profesional. Amati teknik mereka, lalu coba terapkan dalam latihanmu.</p>
+                    </div>
+                     <div class="bg-white p-6 rounded-2xl border border-stone-200 shadow-md">
+                        <h3 class="font-bold text-xl mb-2 text-stone-800">🤝 Komunikasi Tim</h3>
+                        <p class="text-stone-600">Selalu bicara di lapangan! Kata-kata seperti "Bola!", "Aku!", atau "Awas!" sangat penting untuk menghindari tabrakan dan membangun kerja sama yang efektif.</p>
+                    </div>
+                     <div class="bg-white p-6 rounded-2xl border border-stone-200 shadow-md">
+                        <h3 class="font-bold text-xl mb-2 text-stone-800">✅ Jangan Takut Salah</h3>
+                        <p class="text-stone-600">Semua orang belajar dari kesalahan. Jangan takut mencoba hal baru atau melakukan kesalahan. Yang paling penting adalah terus mencoba dan memperbaiki diri.</p>
+                    </div>
+                     <div class="bg-white p-6 rounded-2xl border border-stone-200 shadow-md">
+                        <h3 class="font-bold text-xl mb-2 text-stone-800">😄 Bersenang-senang!</h3>
+                        <p class="text-stone-600">Nikmati setiap momen saat bermain. Olahraga adalah tentang kegembiraan, semangat, dan membangun persahabatan.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="mt-16 text-center text-stone-500 text-sm">
+            <p>&copy; 2025 Materi Ajar Bola Voli. Dibuat oleh Yohanes Susanto.</p>
+            <p>Ikuti saya di media sosial: <a href="https://www.instagram.com/yoo.hann_" target="_blank" class="text-orange-600 hover:underline">@yoo.hann_</a></p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const contentSections = document.querySelectorAll('.content-section');
+            const interactiveCards = document.querySelectorAll('.interactive-card');
+
+            function showSection(targetId) {
+                contentSections.forEach(section => {
+                    section.classList.remove('active');
+                });
+                document.getElementById(targetId).classList.add('active');
+
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.dataset.target === targetId) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    showSection(link.dataset.target);
+                });
+            });
+
+            interactiveCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    card.classList.toggle('open');
+                });
+            });
+
+            // Show default section
+            showSection('dasar');
+
+            // Chart.js implementation for Net Height
+            const ctx = document.getElementById('netHeightChart');
+            if(ctx) {
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Putra', 'Putri'],
+                        datasets: [{
+                            label: 'Tinggi Net (meter)',
+                            data: [2.43, 2.24],
+                            backgroundColor: [
+                                'rgba(59, 130, 246, 0.7)', /* Blue-600 with opacity */
+                                'rgba(239, 68, 68, 0.7)'  /* Red-600 with opacity */
+                            ],
+                            borderColor: [
+                                'rgba(59, 130, 246, 1)',
+                                'rgba(239, 68, 68, 1)'
+                            ],
+                            borderWidth: 1,
+                            borderRadius: 5 /* Rounded bars */
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Tinggi (m)',
+                                    color: '#57534e' /* stone-600 */
+                                },
+                                ticks: {
+                                    color: '#57534e'
+                                },
+                                grid: {
+                                    color: '#e7e5e4' /* stone-200 */
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    color: '#57534e'
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                backgroundColor: '#3b3734', /* Darker background for tooltip */
+                                titleColor: '#fcf8f5',
+                                bodyColor: '#fcf8f5',
+                                borderColor: '#ea580c',
+                                borderWidth: 1,
+                                padding: 10,
+                                displayColors: false, /* Hide color box in tooltip */
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.y !== null) {
+                                            label += context.parsed.y + ' m';
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
